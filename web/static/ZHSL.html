@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>智慧水利</title>
+  <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+  <script src="js/echarts.min.js"></script>
+  <script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0&tk=ec7224d7f008c4466a02982d13bbebcd"></script>
+  <style>
+    /*导航栏样式*/
+    #QUYU{
+      weight:200px;
+      height:200px;
+      overflow: scroll;
+    }
+    #QUYU a{
+      color: #5474b8;
+    }
+    html, body {width:100%;height:100%;} /*非常重要的样式让背景图片100%适应整个屏幕*/
+    .bg { display: table;width: 100%;height: 100%;padding: 100px 0;text-align: center;color: #ffffff;/*background: url("img/true.png") no-repeat bottom center;*/background-color: #e8e3e3;background-size: cover;}
+    .my-navbar {padding:10px 0;transition: background 0.5s ease-in-out, padding 0.5s ease-in-out;}
+    .my-navbar .QUYUA{background:transparent !important;color:#fff !important}
+    .my-navbar .QUYUA:hover {color:#45bcf9 !important;background:transparent;outline:0}
+    .my-navbar .QUYUA {transition: color 0.5s ease-in-out;}
+    button.navbar-toggle {background-color:#fbfbfb;}
+    button.navbar-toggle > span.icon-bar {background-color:#dedede}
+
+    /*首页样式*/
+    #DITU{
+      position: absolute;
+      display:block;
+      width:800px;height:550px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-90%, -45%);
+      padding: 50px;
+    }
+    #maptype{
+      position: absolute;
+      display:block;
+      top: 85%;
+      left: 55%;
+      transform: translate(-60%, -5%);..
+      padding: 50px;
+    }
+
+
+  </style>
+
+
+</head>
+
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse my-navbar">
+  <div class="container-fluid">
+
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#"><b>智慧水利</b></a>
+    </div>
+
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">行政区域选择 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+             <div class="container-fluid" id="QUYU">
+               <li><a href="#" onclick="ReservoirMark()">巴南区</a></li>
+               <li><a href="#">江津区</a></li>
+             </div>
+          </ul>
+        </li>
+        <li ><a class="QUYUA" href="#">首页</a></li>
+        <li><a class="QUYUA" href="#">总览</a></li>
+        <li><a class="QUYUA" href="#">工点监测</a></li>
+        <li><a class="QUYUA" href="#">降雨统计</a></li>
+        <li><a class="QUYUA" href="#">防洪检测</a></li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">账号管理 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">更改账号</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+<div class="bg">
+  <div class="container">
+  <div class="container SHOUYE" id="DITU"></div>
+  <div class="container SHOUYE" id="maptype">
+    <div class="btn-group" role="group" aria-label="...">
+      <button type="button"  onclick="addTer()" class="btn btn-default" id="maptype01">地形图</button>
+      <button type="button"  onclick="addImg()" class="btn btn-default" id="maptype02">影像图</button>
+      <button type="button"  onclick="addVec()" class="btn btn-default" id="maptype03">水利图</button>
+    </div>
+  </div>
+  </div>
+
+  <div class="container SHOUYE" id="shouye02">
+
+  </div>
+
+  <div class="container SHOUYE" id="shouye03">
+
+  </div>
+
+  <div class="container SHOUYE" id="shouye04">
+
+  </div>
+</div>
+
+<script >
+
+  var map;
+  var zoom = 7;
+  var polygon;
+  var lay1,lay2;
+  var TerFlag = 0;
+  var GovFlag = 0;
+  var Visible_ReservoirMark = 0;
+
+  function clear(){
+    if(lay2){
+      map.removeLayer(lay2);
+    }
+
+  }
+  function addTer() {
+    GovFlag = 0;
+    ImgFlag = 0;
+    if(TerFlag == 0)
+    {clear();
+      var imageURL = "http://t0.tianditu.gov.cn/ter_w/wmts?" +
+        "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ter&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles" +
+        "&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=ec7224d7f008c4466a02982d13bbebcd";
+      //创建自定义图层对象
+      lay2 = new T.TileLayer(imageURL, { minZoom: 1, maxZoom: 18 });
+      //将图层增加到地图上
+      map.addLayer(lay2);
+      TerFlag++;
+    }
+  }
+
+  function addImg(){
+    TerFlag = 0;
+    GovFlag = 0;
+    if(ImgFlag == 0)
+    { clear();
+      var imageURL = "http://t0.tianditu.gov.cn/img_w/wmts?" +
+        "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles" +
+        "&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=ec7224d7f008c4466a02982d13bbebcd";
+      //创建自定义图层对象
+      lay2 = new T.TileLayer(imageURL, {minZoom: 1, maxZoom:18});
+      //将图层增加到地图上
+      map.addLayer(lay2);
+      ImgFlag++;
+    }
+  }
+
+  function addVec(){
+    clear();
+  }
+
+  function MarkerClick(e) {
+    map.centerAndZoom(new T.LngLat(106.55365, 29.3714), 30);
+  }
+
+  function ReservoirMark(){
+    if(Visible_ReservoirMark==0){
+      marker = new T.Marker(new T.LngLat(106.55365, 29.3714));// 创建标注
+      marker2 = new T.Marker(new T.LngLat(106.14063,29.46441));
+      marker3 = new T.Marker(new T.LngLat(106.55874,29.38578));
+      marker4 = new T.Marker(new T.LngLat(106.6017,29.3643));
+      marker5 = new T.Marker(new T.LngLat(106.67171,29.35246));
+      marker.addEventListener("click", MarkerClick);//监听点击
+      map.addOverLay(marker);// 将标注添加到地图中
+      map.addOverLay(marker2);
+      map.addOverLay(marker3);
+      map.addOverLay(marker4);
+      map.addOverLay(marker5);
+      label = new T.Label({//创建标记的标签
+        text: "<b>龙岗水库<b>",
+        position: marker.getLngLat(),
+        offset: new T.Point(3, -30)
+      })
+      map.addOverLay(label);//将标签添加在地图中
+      Visible_ReservoirMark++;
+    }else{
+      map.removeOverLay(marker);
+      map.removeOverLay(marker2);
+      map.removeOverLay(marker3);
+      map.removeOverLay(marker4);
+      map.removeOverLay(marker5);
+      map.removeOverLay(label);
+      Visible_ReservoirMark--;
+    }
+
+  }
+  function makearea(){
+    var points = [];
+    points.push(new T.LngLat(106.97388,30.06909));
+    points.push(new T.LngLat(107.4353,30.73711));
+    points.push(new T.LngLat(107.52319,30.86451));
+    points.push(new T.LngLat(107.9187,30.96348));
+    points.push(new T.LngLat(108.12744,31.48958));
+    points.push(new T.LngLat(108.42957,31.76087));
+    points.push(new T.LngLat(108.20435,31.98012));
+    points.push(new T.LngLat(108.38013,32.19421));
+    points.push(new T.LngLat(108.51196,32.2221));
+    points.push(new T.LngLat(109.7644,31.69078));
+    points.push(new T.LngLat(110.20386,31.36302));
+    points.push(new T.LngLat(110.25879,31.10939));
+    points.push(new T.LngLat(110.15991,30.74184));
+    points.push(new T.LngLat(109.37988,30.4392));
+    points.push(new T.LngLat(109.09424,30.48655));
+    points.push(new T.LngLat(108.76465,30.4392));
+    points.push(new T.LngLat(108.479,30.39183));
+    points.push(new T.LngLat(108.63281,30.2211));
+    points.push(new T.LngLat(108.63281,29.85017));
+    points.push(new T.LngLat(108.92944,29.59257));
+    points.push(new T.LngLat(109.11621,29.34388));
+    points.push(new T.LngLat(109.1272,29.36303));
+    points.push(new T.LngLat(109.34692,29.03216));
+    points.push(new T.LngLat(109.37988,28.43005));
+    points.push(new T.LngLat(109.03931,28.07198));
+    points.push(new T.LngLat(108.7207,28.13982));
+    points.push(new T.LngLat(108.55591,28.31405));
+    points.push(new T.LngLat(108.30322,28.6231));
+    points.push(new T.LngLat(108.21533,28.93125));
+    points.push(new T.LngLat(107.85278,28.9024));
+    points.push(new T.LngLat(106.72119,28.3914));
+    points.push(new T.LngLat(106.34766,28.47835));
+    points.push(new T.LngLat(106.073,28.83505));
+    points.push(new T.LngLat(105.78735,28.87354));
+    points.push(new T.LngLat(105.65552,29.16176));
+    points.push(new T.LngLat(105.39185,29.24806));
+    points.push(new T.LngLat(105.26001,29.58301));
+    points.push(new T.LngLat(105.65552,29.90733));
+    points.push(new T.LngLat(105.52368,30.15463));
+    points.push(new T.LngLat(105.77637,30.44867));
+    points.push(new T.LngLat(106.19385,30.3065));
+    points.push(new T.LngLat(106.24329,30.21161));
+    points.push(new T.LngLat(106.43005,30.30413));
+    points.push(new T.LngLat(106.56601,30.31599));
+    points.push(new T.LngLat(106.67313,30.25551));
+    points.push(new T.LngLat(106.74316,30.0477));
+    //创建面对象
+    var polygon = new T.Polygon(points,{
+      color: "blue", weight:3 , opacity: 0.5, fillColor: "#FFFFFF", fillOpacity: 0.1
+    });
+    //向地图上添加面
+    map.addOverLay(polygon);
+  }
+
+  function onLoad() {
+    //初始化地图对象
+    map = new T.Map("DITU");
+    //创建自定义图层对象
+    var imageURL0 = "http://t0.tianditu.gov.cn/vec_w/wmts?" +
+      "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles" +
+      "&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=ec7224d7f008c4466a02982d13bbebcd";
+    lay1 = new T.TileLayer(imageURL0, {minZoom: 1, maxZoom: 18});
+    //将图层增加到地图上
+    map.addLayer(lay1);
+    map.setMinZoom(6);
+    map.setMaxZoom(16);
+    //设置显示地图的中心点和级别
+    map.centerAndZoom(new T.LngLat(107.36499, 30.35771), zoom);
+    makearea();
+  }
+
+  onLoad();
+
+
+</script>
+
+</body>
+
+
+
+<script src = "js/jquery-3.2.0.min.js"></script>
+<script src = "js/bootstrap.min.js"></script>
+</html>
