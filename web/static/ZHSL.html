@@ -17,7 +17,7 @@
       color: #5474b8;
     }
     html, body {width:100%;height:100%;} /*非常重要的样式让背景图片100%适应整个屏幕*/
-    .bg { display: table;width: 100%;height: 100%;padding: 100px 0;text-align: center;color: #ffffff;/*background: url("img/true.png") no-repeat bottom center;*/background-color: #e8e3e3;background-size: cover;}
+    .bg { display: table;width: 100%;height: 100%;padding: 100px 0;text-align: center;color: #ffffff;/*background: url("img/true.png") no-repeat bottom center;*/background-color: #cde9fc;background-size: cover;}
     .my-navbar {padding:10px 0;transition: background 0.5s ease-in-out, padding 0.5s ease-in-out;}
     .my-navbar .QUYUA{background:transparent !important;color:#fff !important}
     .my-navbar .QUYUA:hover {color:#45bcf9 !important;background:transparent;outline:0}
@@ -42,6 +42,15 @@
       left: 55%;
       transform: translate(-60%, -5%);..
       padding: 50px;
+    }
+    #shuiweiqingkuang{
+      position: absolute;
+      display:block;
+      top: 50%;
+      left: 50%;
+      width:400px;height:350px;
+      transform: translate(30%, 5%);..
+    padding: 50px;
     }
 
 
@@ -98,8 +107,8 @@
 </nav>
 
 
-<div class="bg">
-  <div class="container">
+<div class="bg" style="overflow: scroll" >
+  <div class="container" style="background: white">
   <div class="container SHOUYE" id="DITU"></div>
   <div class="container SHOUYE" id="maptype">
     <div class="btn-group" role="group" aria-label="...">
@@ -110,7 +119,7 @@
   </div>
   </div>
 
-  <div class="container SHOUYE" id="shouye02">
+  <div class="container SHOUYE"   id="shuiweiqingkuang">
 
   </div>
 
@@ -284,7 +293,158 @@
   }
 
   onLoad();
+/---------------------------水位情况/
+  var base = +new Date(2020, 10, 1);
+  var oneDay = 24 * 3600 * 1000;
+  var valueBase = Math.random() * 300;
+  var valueBase2 = Math.random() * 50;
+  var data = [];
+  var data2 = [];
+  var myDate = new Date();
+  var mytime=myDate.toLocaleTimeString();     //获取当前时间
 
+  for (var i = 1; i < 10; i++) {
+    var now = new Date(base += oneDay);
+    var dayStr = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-');
+
+    valueBase = Math.round((Math.random() - 0.5) * 20 + valueBase);
+    valueBase <= 0 && (valueBase = Math.random() * 300);
+    data.push([dayStr, valueBase]);
+
+    valueBase2 = Math.round((Math.random() - 0.5) * 20 + valueBase2);
+    valueBase2 <= 0 && (valueBase2 = Math.random() * 50);
+    data2.push([dayStr, valueBase2]);
+  }
+
+  option = {
+    animation: false,
+    title: {
+      left: 'center',
+      text: '水位情况',
+      subtext: '龙岗水库',
+    },
+    legend: {
+      top: 'bottom',
+      data: ['意向']
+    },
+    tooltip: {
+      triggerOn: 'none',
+      position: function (pt) {
+        return [pt[0], 130];
+      }
+    },
+    toolbox: {
+      left: 'center',
+      itemSize: 25,
+      top: 55,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none'
+        },
+        restore: {}
+      }
+    },
+    xAxis: {
+      type: 'time',
+      // boundaryGap: [0, 0],
+      axisPointer: {
+        value: '2016-10-7',
+        snap: true,
+        lineStyle: {
+          color: '#004E52',
+          opacity: 0.5,
+          width: 2
+        },
+        label: {
+          show: true,
+          formatter: function (params) {
+            return echarts.format.formatTime('yyyy-MM-dd', params.value);
+          },
+          backgroundColor: '#004E52'
+        },
+        handle: {
+          show: true,
+          color: '#004E52'
+        }
+      },
+      splitLine: {
+        show: false
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisTick: {
+        inside: true
+      },
+      splitLine: {
+        show: false
+      },
+      axisLabel: {
+        inside: true,
+        formatter: '{value}\n'
+      },
+      z: 10
+    },
+    grid: {
+      top: 110,
+      left: 15,
+      right: 15,
+      height: 160
+    },
+    dataZoom: [{
+      type: 'inside',
+      throttle: 50
+    }],
+    series: [
+      {
+        name: '模拟数据',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 5,
+        sampling: 'average',
+        itemStyle: {
+          color: '#8ec6ad'
+        },
+        stack: 'a',
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+            offset: 0,
+            color: '#8ec6ad'
+          }, {
+            offset: 1,
+            color: '#ffe'
+          }])
+        },
+        data: data
+      },
+      {
+        name: '模拟数据',
+        type: 'line',
+        smooth: true,
+        stack: 'a',
+        symbol: 'circle',
+        symbolSize: 5,
+        sampling: 'average',
+        itemStyle: {
+          color: '#d68262'
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+            offset: 0,
+            color: '#d68262'
+          }, {
+            offset: 1,
+            color: '#ffe'
+          }])
+        },
+        data: data2
+      }
+
+    ]
+  };
+  var shuiweiqingkuang = echarts.init(document.getElementById('shuiweiqingkuang'));
+  shuiweiqingkuang.setOption(option);
 
 </script>
 
